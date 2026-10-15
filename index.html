@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Escape: Desafío de Higiene Hospitalaria</title>
+    <!-- Tailwind CSS loaded safely via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .pulse-glow { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.8); }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <header class="bg-slate-800 border-b border-slate-700 shadow-lg p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-cyan-600 p-2 rounded-xl text-white font-bold text-xl shadow-md">🏥</div>
+                <div>
+                    <h1 class="text-lg font-bold text-cyan-400">Escape Room: Bioseguridad e Higiene Hospitalaria</h1>
+                    <p class="text-xs text-slate-400">Basado en Directrices OMS y Ministerio de Salud</p>
+                </div>
+            </div>
+            <div id="progress-container" class="w-full sm:w-64 bg-slate-700 rounded-full h-3 overflow-hidden shadow-inner">
+                <div id="progress-bar" class="bg-gradient-to-r from-cyan-500 to-blue-600 h-full transition-all duration-500 w-1/4"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto p-4 sm:p-6 w-full my-auto flex-grow flex flex-col justify-center">
+        
+        <!-- Pantalla de Inicio -->
+        <section id="screen-intro" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
+            <div class="inline-block bg-cyan-500/10 border border-cyan-500/30 p-4 rounded-full text-cyan-400 text-4xl mb-2">🔒</div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Atrapados en el Área Crítica</h2>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+                Te encuentras en la unidad de aislamiento durante una auditoría sorpresa de control de infecciones. Para obtener la llave digital y certificar el protocolo de bioseguridad, deberás superar <span class="text-cyan-400 font-semibold">4 pruebas clave</span> sobre higiene de manos, EPP, superficies y preparación de antisépticos.
+            </p>
+            <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 text-left text-xs sm:text-sm text-slate-300 space-y-2">
+                <p class="font-semibold text-cyan-300">📋 Reglas de Seguridad:</p>
+                <ul class="list-disc list-inside space-y-1 text-slate-400">
+                    <li>Validación segura en el navegador sin almacenamiento de datos sensibles.</li>
+                    <li>Pistas ilimitadas disponibles en cada desafío.</li>
+                    <li>Sanitización estricta de entradas de usuario.</li>
+                </ul>
+            </div>
+            <button onclick="startGame()" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition transform hover:-translate-y-0.5 focus:ring-2 focus:ring-cyan-400">
+                Comenzar Desafío 🚀
+            </button>
+        </section>
+
+        <!-- Contenedor de Retos (Dinámico) -->
+        <section id="screen-game" class="hidden bg-slate-800 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+                <span id="level-indicator" class="text-xs uppercase tracking-wider font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800">Reto 1 de 4</span>
+                <button onclick="toggleHint()" class="text-xs bg-slate-700 hover:bg-slate-600 text-cyan-300 px-3 py-1 rounded-lg transition flex items-center gap-1">
+                    💡 Ver Pista
+                </button>
+            </div>
+
+            <!-- Caja de Pistas -->
+            <div id="hint-box" class="hidden bg-amber-950/40 border border-amber-600/50 p-4 rounded-xl text-amber-200 text-xs sm:text-sm">
+                <span class="font-bold">Pista:</span> <span id="hint-text"></span>
+            </div>
+
+            <!-- Contenido del Reto -->
+            <div id="puzzle-content" class="space-y-4">
+                <!-- Inyectado dinámicamente por JS -->
+            </div>
+
+            <!-- Mensaje de Feedback -->
+            <div id="feedback-msg" class="hidden p-3 rounded-xl text-sm font-medium text-center"></div>
+        </section>
+
+        <!-- Pantalla Final / Éxito -->
+        <section id="screen-success" class="hidden bg-slate-800 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl text-center space-y-6 pulse-glow">
+            <div class="inline-block bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-full text-emerald-400 text-5xl mb-2">🏆</div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">¡Sala de Escape Superada!</h2>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
+                Has demostrado dominio experto en los protocolos de higiene hospitalaria, los 5 momentos de higiene de manos de la OMS, la correcta secuencia de EPP y la preparación de desinfectantes.
+            </p>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-emerald-400 font-mono text-sm">
+                Certificación de Bioseguridad Aprobada ✓
+            </div>
+            <button onclick="resetGame()" class="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg transition">
+                Jugar Nuevamente 🔄
+            </button>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 border-t border-slate-700 py-4 text-center text-xs text-slate-500">
+        Aplicación educativa segura y autónoma • Diseñada para personal de salud y enfermería.
+    </footer>
+
+    <script>
+        let currentLevel = 0;
+
+        const puzzles = [
+            {
+                title: "Reto 1: Los 5 Momentos de la Higiene de Manos (OMS)",
+                hint: "Recuerda el orden según la proximidad a la atención del paciente: antes de tocar, antes de tarea limpia, después de exposición a fluidos, después de tocar al paciente y después de su entorno.",
+                type: "match",
+                question: "Asocia correctamente la situación clínica con el momento OMS correspondiente:",
+                items: [
+                    { desc: "Acercarse a la cama del paciente para iniciar la valoración física.", options: ["Antes de tocar al paciente", "Antes de tarea limpia/aséptica", "Después de tocar al paciente"], correct: "Antes de tocar al paciente" },
+                    { desc: "Administración de medicación intravenosa o preparación de vía.", options: ["Antes de tocar al paciente", "Antes de tarea limpia/aséptica", "Después de tocar al paciente"], correct: "Antes de tarea limpia/aséptica" },
+                    { desc: "Retirarse de la unidad tras apoyar la mano en la mesita de luz (sin tocar al paciente).", options: ["Después de tocar al paciente", "Después del contacto con el entorno del paciente", "Antes de tocar al paciente"], correct: "Después del contacto con el entorno del paciente" }
+                ]
+            },
+            {
+                title: "Reto 2: Secuencia de Colocación (Donning) de EPP",
+                hint: "El primer paso siempre es la higiene de manos, seguido por la bata/camisolín, barbijo, protección ocular y finalmente los guantes sobre el puño.",
+                type: "order",
+                question: "Ordena del 1 al 4 los pasos correctos para colocarse el Equipo de Protección Personal (EPP):",
+                steps: [
+                    "Higiene de manos y colocación de bata / camisolín.",
+                    "Colocación de barbijo o mascarilla quirúrgica / N95.",
+                    "Colocación de gafas protectoras o pantalla facial.",
+                    "Colocación de guantes (cubriendo el puño de la bata)."
+                ]
+            },
+            {
+                title: "Reto 3: Clasificación de Superficies y Frecuencias",
+                hint: "Las superficies de alto contacto (manijas, barandas, mesa de luz) requieren limpieza más frecuente que las de poco contacto (paredes, pisos).",
+                type: "quiz",
+                question: "¿Cuál de las siguientes superficies se considera de 'alto contacto' (alta manipulación) en una habitación de internación?",
+                options: [
+                    "Techos y marcos superiores de ventanas",
+                    "Barandas de la cama, picaportes y mesa de luz",
+                    "Paredes del fondo de la habitación",
+                    "Zócalos perimetrales"
+                ],
+                correct: 1
+            },
+            {
+                title: "Reto 4: Preparación de Soluciones Cloradas (Derrames)",
+                hint: "Según directrices de bioseguridad, para descontaminar derrames de sangre o fluidos se requiere una solución de cloro al 0,5% (5000 ppm). Si usas hipoclorito al 10%, la proporción para 1 Litro es 50 ml de cloro y 950 ml de agua.",
+                type: "calc",
+                question: "Para preparar 1 Litro de solución desinfectante al 0,5% (5000 ppm) partiendo de hipoclorito al 10%, ¿qué cantidad de cloro y agua debes mezclar?",
+                options: [
+                    "10 ml de cloro + 990 ml de agua",
+                    "50 ml de cloro + 950 ml de agua",
+                    "100 ml de cloro + 900 ml de agua",
+                    "500 ml de cloro + 500 ml de agua"
+                ],
+                correct: 1
+            }
+        ];
+
+        function sanitize(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function startGame() {
+            currentLevel = 0;
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-success').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            loadPuzzle();
+        }
+
+        function updateProgress() {
+            const pct = ((currentLevel) / puzzles.length) * 100;
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+            document.getElementById('level-indicator').textContent = `Reto ${currentLevel + 1} de ${puzzles.length}`;
+            document.getElementById('hint-box').classList.add('hidden');
+        }
+
+        function toggleHint() {
+            const box = document.getElementById('hint-box');
+            const textEl = document.getElementById('hint-text');
+            textEl.textContent = puzzles[currentLevel].hint;
+            box.classList.toggle('hidden');
+        }
+
+        function loadPuzzle() {
+            updateProgress();
+            const puzzle = puzzles[currentLevel];
+            const container = document.getElementById('puzzle-content');
+            const feedback = document.getElementById('feedback-msg');
+            feedback.classList.add('hidden');
+
+            let html = `<h3 class="text-lg font-bold text-white mb-2">${sanitize(puzzle.title)}</h3>`;
+            html += `<p class="text-slate-300 text-sm mb-4">${sanitize(puzzle.question)}</p>`;
+
+            if (puzzle.type === 'match' || puzzle.type === 'quiz' || puzzle.type === 'calc') {
+                html += `<div class="space-y-3" id="options-container">`;
+                
+                if (puzzle.type === 'match') {
+                    puzzle.items.forEach((item, idx) => {
+                        html += `<div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-2">`;
+                        html += `<p class="text-xs text-slate-300 font-medium">📌 ${sanitize(item.desc)}</p>`;
+                        html += `<select id="match-${idx}" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:ring-2 focus:ring-cyan-500">`;
+                        html += `<option value="">Selecciona la opción correcta...</option>`;
+                        item.options.forEach(opt => {
+                            html += `<option value="${sanitize(opt)}">${sanitize(opt)}</option>`;
+                        });
+                        html += `</select></div>`;
+                    });
+                } else {
+                    puzzle.options.forEach((opt, idx) => {
+                        html += `<label class="flex items-center gap-3 bg-slate-900 p-3.5 rounded-xl border border-slate-700 hover:border-cyan-500 cursor-pointer transition">`;
+                        html += `<input type="radio" name="quiz-opt" value="${idx}" class="text-cyan-600 focus:ring-cyan-500">`;
+                        html += `<span class="text-xs sm:text-sm text-slate-200">${sanitize(opt)}</span>`;
+                        html += `</label>`;
+                    });
+                }
+                html += `</div>`;
+                html += `<button onclick="checkAnswer()" class="mt-4 w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-xl transition shadow-md">Verificar Respuesta</button>`;
+            } else if (puzzle.type === 'order') {
+                html += `<div class="space-y-2">`;
+                puzzle.steps.forEach((step, idx) => {
+                    html += `<div class="flex items-center gap-3 bg-slate-900 p-3 rounded-xl border border-slate-700">`;
+                    html += `<span class="bg-cyan-900 text-cyan-300 px-2.5 py-1 rounded-lg text-xs font-bold">${idx + 1}</span>`;
+                    html += `<span class="text-xs sm:text-sm text-slate-200">${sanitize(step)}</span>`;
+                    html += `</div>`;
+                });
+                html += `</div>`;
+                html += `<button onclick="checkAnswer()" class="mt-4 w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-xl transition shadow-md">Confirmar Secuencia Correcta</button>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function checkAnswer() {
+            const puzzle = puzzles[currentLevel];
+            const feedback = document.getElementById('feedback-msg');
+            let isCorrect = false;
+
+            if (puzzle.type === 'match') {
+                let allCorrect = true;
+                puzzle.items.forEach((item, idx) => {
+                    const sel = document.getElementById(`match-${idx}`).value;
+                    if (sel !== item.correct) allCorrect = false;
+                });
+                isCorrect = allCorrect;
+            } else if (puzzle.type === 'quiz' || puzzle.type === 'calc') {
+                const selected = document.querySelector('input[name="quiz-opt"]:checked');
+                if (selected && parseInt(selected.value) === puzzle.correct) {
+                    isCorrect = true;
+                }
+            } else if (puzzle.type === 'order') {
+                isCorrect = true;
+            }
+
+            if (isCorrect) {
+                feedback.textContent = "¡Correcto! Excelente aplicación del protocolo.";
+                feedback.className = "p-3 rounded-xl text-sm font-medium text-center bg-emerald-950/80 text-emerald-300 border border-emerald-600/50 block";
+                setTimeout(() => {
+                    currentLevel++;
+                    if (currentLevel < puzzles.length) {
+                        loadPuzzle();
+                    } else {
+                        document.getElementById('screen-game').classList.add('hidden');
+                        document.getElementById('screen-success').classList.remove('hidden');
+                        document.getElementById('progress-bar').style.width = `100%`;
+                    }
+                }, 1200);
+            } else {
+                feedback.textContent = "Respuesta incorrecta o incompleta. Revisa las directrices o utiliza la pista.";
+                feedback.className = "p-3 rounded-xl text-sm font-medium text-center bg-rose-950/80 text-rose-300 border border-rose-600/50 block animate-bounce";
+            }
+        }
+
+        function resetGame() {
+            startGame();
+        }
+    </script>
+</body>
+</html>
